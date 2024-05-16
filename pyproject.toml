@@ -14,7 +14,7 @@ dynamic = ['dependencies', 'optional-dependencies', 'version']
 
 
 [project.scripts]
-'check-ruff-versions' = 'pre_commit_hooks.cli:main'
+'check-ruff-versions' = 'pre_commit_hooks.check_ruff_versions:main'
 
 
 [tool.reqs]

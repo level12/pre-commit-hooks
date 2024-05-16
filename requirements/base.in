@@ -3,3 +3,6 @@ pytest
 pytest-cov
 
 # App specific (ditto)
+click
+pip-requirements-parser
+PyYAML
