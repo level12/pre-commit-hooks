@@ -1,0 +1,20 @@
+[build-system]
+requires = [
+    'hatchling',
+    'hatch-requirements-txt',
+    'hatch-regex-commit',
+]
+build-backend = 'hatchling.build'
+
+
+[project]
+name = 'pre-commit-hooks'
+authors = [{name = 'Randy Syring', email = 'randy.syring@level12.io'}]
+dynamic = ['dependencies', 'optional-dependencies', 'version']
+
+
+[project.scripts]
+'check-ruff-versions' = 'pre_commit_hooks.cli:main'
+
+
+[tool.reqs]
