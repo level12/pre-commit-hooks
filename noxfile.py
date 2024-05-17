@@ -13,6 +13,7 @@ nox.options.default_venv_backend = 'uv'
 @nox.session
 def tests(session: nox.Session):
     session.install('-r', 'requirements/base.txt')
+    session.install('e', '.')
     session.run(
         'pytest',
         # use our pytest.ini for warning management
@@ -25,7 +26,7 @@ def tests(session: nox.Session):
         '--cov-report=xml',
         '--no-cov-on-fail',
         f'--junit-xml={package_path}/ci/test-reports/{session.name}.pytests.xml',
-        'src',
+        'tests',
     )
 
 
