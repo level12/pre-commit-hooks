@@ -19,7 +19,7 @@ class TestCheckRuffVersions:
         assert pc == dev
 
         monkeypatch.chdir(start_at)
-        result = run_cli()
+        result = run_cli('.pre-commit-config.yaml')
         assert result.exit_code == 0
         assert result.output == ''
 
@@ -31,7 +31,7 @@ class TestCheckRuffVersions:
         assert dev == '0.4.3'
 
         monkeypatch.chdir(start_at)
-        result = run_cli()
+        result = run_cli('requirements/dev.txt')
         assert result.exit_code == 1
         assert result.output.strip() == ('pre-commit ruff: 0.4.4\ndev.txt ruff: 0.4.3')
 
@@ -41,6 +41,15 @@ class TestCheckRuffVersions:
         assert get_versions(start_at) == (None, None)
 
         monkeypatch.chdir(start_at)
-        result = run_cli()
+        result = run_cli('.pre-commit-config.yaml')
         assert result.exit_code == 1
         assert result.output == 'Both pre-commit and dev.txt are missing ruff\n'
+
+    def test_pkg_in_sub_dir(self, monkeypatch):
+        start_at = tests_dpath / 'check-ruff-versions-pkg-in-sub-dir'
+
+        # Simulate how pre-commit chdir's to the git root before execution:
+        monkeypatch.chdir(start_at)
+        result = run_cli('some-pkg/.pre-commit-config.yaml')
+        assert result.exit_code == 0
+        assert result.output == ''

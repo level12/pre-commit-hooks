@@ -39,7 +39,16 @@ def get_versions(start_at: Path):
 @click.command()
 @click.argument('filenames', nargs=-1)
 def main(filenames):
-    pc, dev = get_versions(Path.cwd())
+    start_at = Path.cwd()
+    filename = filenames[0]
+
+    if filename.endswith('.pre-commit-config.yaml'):
+        start_at = start_at.joinpath(filename).parent
+    else:
+        # It must be the dev.txt requirements file
+        start_at = start_at.joinpath(filename).parent.parent
+
+    pc, dev = get_versions(start_at)
 
     if pc != dev:
         print('pre-commit ruff:', pc)
