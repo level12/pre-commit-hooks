@@ -31,7 +31,6 @@ dependencies = [
 dev = [
     # From Coppy:
     {include-group = "tests"},
-    {include-group = "pre-commit"},
     {include-group = "audit"},
     {include-group = "nox"},
     'click>=8.1.8',
@@ -39,7 +38,6 @@ dev = [
     'ruff>=0.9.6',
     # App specific:
     # TODO: fill in app deps here
-    "pre-commit-uv>=4.1.4",
 ]
 # Used by nox
 tests = [
@@ -49,11 +47,13 @@ tests = [
 
     # App specific:
     # TODO: fill in app deps here
+    {include-group = "pre-commit"},
 ]
 # Used by nox
 pre-commit = [
     # From Coppy:
     'pre-commit>=4.1.0',
+    'pre-commit-uv>=4.1.4',
 ]
 # Used by nox
 audit = [

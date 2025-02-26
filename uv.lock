@@ -733,8 +733,11 @@ nox = [
 ]
 pre-commit = [
     { name = "pre-commit" },
+    { name = "pre-commit-uv" },
 ]
 tests = [
+    { name = "pre-commit" },
+    { name = "pre-commit-uv" },
     { name = "pytest" },
     { name = "pytest-cov" },
 ]
@@ -760,8 +763,13 @@ dev = [
     { name = "ruff", specifier = ">=0.9.6" },
 ]
 nox = [{ name = "nox", specifier = ">=2025.2.9" }]
-pre-commit = [{ name = "pre-commit", specifier = ">=4.1.0" }]
+pre-commit = [
+    { name = "pre-commit", specifier = ">=4.1.0" },
+    { name = "pre-commit-uv", specifier = ">=4.1.4" },
+]
 tests = [
+    { name = "pre-commit", specifier = ">=4.1.0" },
+    { name = "pre-commit-uv", specifier = ">=4.1.4" },
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-cov", specifier = ">=6.0" },
 ]
