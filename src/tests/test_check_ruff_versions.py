@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from click.testing import CliRunner
+
 from pre_commit_hooks.check_ruff_versions import get_versions, main
 
 
@@ -53,3 +54,17 @@ class TestCheckRuffVersions:
         result = run_cli('some-pkg/.pre-commit-config.yaml')
         assert result.exit_code == 0
         assert result.output == ''
+
+
+class TestCheckRuffVersionsUV:
+    def test_different(self, monkeypatch):
+        start_at = tests_dpath / 'check-ruff-versions-diff-uv'
+
+        pc, dev = get_versions(start_at)
+        assert pc == '0.4.4'
+        assert dev == '0.9.7'
+
+        monkeypatch.chdir(start_at)
+        result = run_cli('uv.lock')
+        assert result.exit_code == 1
+        assert result.output.strip() == ('pre-commit ruff: 0.4.4\ndev.txt ruff: 0.9.7')

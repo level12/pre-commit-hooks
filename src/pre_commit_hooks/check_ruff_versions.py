@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+import tomllib
 
 import click
 import pip_requirements_parser as prp
@@ -18,7 +19,7 @@ def pre_commit_version(pc_yaml: Path):
     return None
 
 
-def dev_version(dev_txt: Path):
+def dev_version_txt(dev_txt: Path):
     req_file = prp.RequirementsFile.from_file(dev_txt)
     try:
         ruff_req = next(
@@ -29,10 +30,32 @@ def dev_version(dev_txt: Path):
         return
 
 
+def _find_package(packages: list[dict], name: str):
+    for package in packages:
+        if package['name'] == name:
+            return package
+    return None
+
+
+def dev_version_uv(uv_lock: Path):
+    with uv_lock.open('rb') as uv_fo:
+        lock_data = tomllib.load(uv_fo)
+    ruff = _find_package(lock_data['package'], 'ruff')
+    if not ruff:
+        return
+    return ruff['version']
+
+
 def get_versions(start_at: Path):
+    uv_lock_path = start_at / 'uv.lock'
+    dev_version = (
+        dev_version_uv(uv_lock_path)
+        if uv_lock_path.exists()
+        else dev_version_txt(start_at / 'requirements' / 'dev.txt')
+    )
     return (
         pre_commit_version(start_at / '.pre-commit-config.yaml'),
-        dev_version(start_at / 'requirements' / 'dev.txt'),
+        dev_version,
     )
 
 
@@ -42,10 +65,10 @@ def main(filenames):
     start_at = Path.cwd()
     filename = filenames[0]
 
-    if filename.endswith('.pre-commit-config.yaml'):
+    if filename.endswith(('.pre-commit-config.yaml', 'uv.lock')):
         start_at = start_at.joinpath(filename).parent
     else:
-        # It must be the dev.txt requirements file
+        # It's a dev.txt
         start_at = start_at.joinpath(filename).parent.parent
 
     pc, dev = get_versions(start_at)
