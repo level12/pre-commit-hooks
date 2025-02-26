@@ -1,10 +1,10 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v0.20240517.1
+_commit: v1.20250225.1
 _src_path: gh:level12/copier-py-package
 author_email: randy.syring@level12.io
 author_name: Randy Syring
+hatch_version_tag_sign: true
 project_name: pre-commit-hooks
 py_module: pre_commit_hooks
 python_version: '3.12'
 script_name: check-ruff-versions
-use_pipx: false

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from click.testing import CliRunner
+
 from pre_commit_hooks.check_ruff_versions import get_versions, main
 
 
