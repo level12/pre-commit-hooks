@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from pathlib import Path
 import sys
 import tomllib
@@ -46,37 +47,67 @@ def dev_version_uv(uv_lock: Path):
     return ruff['version']
 
 
-def get_versions(start_at: Path):
-    uv_lock_path = start_at / 'uv.lock'
-    dev_version = (
-        dev_version_uv(uv_lock_path)
-        if uv_lock_path.exists()
-        else dev_version_txt(start_at / 'requirements' / 'dev.txt')
-    )
-    return (
-        pre_commit_version(start_at / '.pre-commit-config.yaml'),
-        dev_version,
-    )
+@dataclass
+class Versions:
+    pc: str
+    proj: str
+    is_uv: bool
+
+    @property
+    def proj_fname(self):
+        return 'uv.lock' if self.is_uv else 'dev.txt'
+
+    @classmethod
+    def at_repo(cls, repo_dpath: Path, package_dpath: Path | None = None):
+        package_dpath = package_dpath or repo_dpath
+
+        assert repo_dpath.exists(), repo_dpath
+        assert package_dpath.exists(), package_dpath
+
+        uv_lock_path = package_dpath / 'uv.lock'
+        is_uv_proj = uv_lock_path.exists()
+
+        dev_version = (
+            dev_version_uv(uv_lock_path)
+            if is_uv_proj
+            else dev_version_txt(package_dpath / 'requirements' / 'dev.txt')
+        )
+        return Versions(
+            pre_commit_version(repo_dpath / '.pre-commit-config.yaml'),
+            dev_version,
+            is_uv_proj,
+        )
 
 
 @click.command()
-@click.argument('filenames', nargs=-1)
-def main(filenames):
-    start_at = Path.cwd()
-    filename = filenames[0]
+@click.argument('file_paths', nargs=-1)
+# pre-commit always calls from the root of the git directory, but give tests an option.
+@click.option(
+    '--repo-root',
+    type=click.Path(path_type=Path, file_okay=False, exists=True),
+    default=Path.cwd(),
+)
+@click.option('--package', 'packages', multiple=True)
+@click.pass_context
+def main(ctx: click.Context, file_paths: list[str], repo_root: Path, packages: list[str]):
+    fail = False
 
-    if filename.endswith(('.pre-commit-config.yaml', 'uv.lock')):
-        start_at = start_at.joinpath(filename).parent
-    else:
-        # It's a dev.txt
-        start_at = start_at.joinpath(filename).parent.parent
+    if not packages:
+        packages = [None]
 
-    pc, dev = get_versions(start_at)
+    if not repo_root.exists():
+        ctx.fail('The repo root must exist:', repo_root)
 
-    if pc != dev:
-        print('pre-commit ruff:', pc)
-        print('dev.txt ruff:', dev)
-        sys.exit(1)
-    elif (pc, dev) == (None, None):
-        print('Both pre-commit and dev.txt are missing ruff')
+    for package in packages:
+        package_dpath = repo_root / package if package else None
+        ver = Versions.at_repo(repo_root, package_dpath)
+        if ver.pc != ver.proj:
+            print('pre-commit ruff:', ver.pc)
+            print(f'{ver.proj_fname} ruff:', ver.proj)
+            fail = True
+        elif (ver.pc, ver.proj) == (None, None):
+            print(f'Both pre-commit and {ver.proj_fname} are missing ruff')
+            fail = True
+
+    if fail:
         sys.exit(1)

@@ -1,0 +1,11 @@
+---
+repos:
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+  - repo: {crv_repo}
+    rev: {crv_rev}
+    hooks:
+      - id: check-ruff-versions
+        args: ['--package', 'some-pkg']

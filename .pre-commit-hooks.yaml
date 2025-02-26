@@ -3,4 +3,4 @@
     description: Ensure ruff version is the same in pre-commit and dev.txt
     entry: check-ruff-versions
     language: python
-    files: 'requirements/dev\.txt$|.pre-commit-config.ya?ml$|uv.lock$'
+    files: '/requirements/dev\.txt$|^.pre-commit-config.ya?ml$|/uv.lock$'

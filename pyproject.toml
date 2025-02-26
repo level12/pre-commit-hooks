@@ -37,9 +37,9 @@ dev = [
     'click>=8.1.8',
     'hatch>=1.14.0',
     'ruff>=0.9.6',
-
     # App specific:
     # TODO: fill in app deps here
+    "pre-commit-uv>=4.1.4",
 ]
 # Used by nox
 tests = [
