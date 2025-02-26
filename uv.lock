@@ -709,6 +709,8 @@ name = "pre-commit-hooks"
 source = { editable = "." }
 dependencies = [
     { name = "click" },
+    { name = "pip-requirements-parser" },
+    { name = "pyyaml" },
 ]
 
 [package.dev-dependencies]
@@ -737,7 +739,11 @@ tests = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "click", specifier = ">=8.1.8" }]
+requires-dist = [
+    { name = "click", specifier = ">=8.1.8" },
+    { name = "pip-requirements-parser", specifier = ">=32.0.1" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
+]
 
 [package.metadata.requires-dev]
 audit = [{ name = "pip-audit", specifier = ">=2.8.0" }]
