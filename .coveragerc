@@ -1,18 +1,13 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
+omit =
+    src/pre_commit_hooks/version.py
 
-[report]
-# Regexes for lines to exclude from consideration
-exclude_lines =
-    # Have to re-enable the standard pragma
-    pragma: no cover
+source =
+    src/pre_commit_hooks
+    tests/pre_commit_hooks_tests
 
-    # testing assertions usually used with exceptions
-    assert False
-
-    # patterns for running cli
-    cli_entry()
 
 [html]
-directory = ci/coverage-html
+directory = tmp/coverage-html

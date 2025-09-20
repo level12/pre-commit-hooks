@@ -1,10 +1,19 @@
-# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v1.20250226.1
+# Changes here will be overwritten by Copier
+#
+# Updating `_src` could be helpful, see notes at:
+# https://github.com/level12/coppy/wiki#creating-a-project
+#
+# Otherwise, NEVER EDIT MANUALLY
+_commit: v1.20250622.1-36-g7b1cff7
 _src_path: gh:level12/copier-py-package
 author_email: randy.syring@level12.io
 author_name: Randy Syring
+gh_org: level12
+gh_repo: pre-commit-hooks
 hatch_version_tag_sign: true
 project_name: pre-commit-hooks
 py_module: pre_commit_hooks
 python_version: '3.12'
 script_name: check-ruff-versions
+use_circleci: false
+use_gh_nox: true

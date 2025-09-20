@@ -11,7 +11,7 @@ name = 'pre-commit-hooks'
 authors = [
     {name = 'Randy Syring', email = 'randy.syring@level12.io'},
 ]
-requires-python = '>=3.12'
+requires-python = '~=3.12.0'
 dynamic = ['version']
 readme = 'readme.md'
 dependencies = [
@@ -19,6 +19,7 @@ dependencies = [
     "pip-requirements-parser>=32.0.1",
     "pyyaml>=6.0.2",
 ]
+
 
 
 [project.scripts]
@@ -30,20 +31,21 @@ dependencies = [
 # conflicts when upgrading to the latest Coppy template.
 dev = [
     # From Coppy:
-    {include-group = "tests"},
+    {include-group = "pytest"},
     {include-group = "audit"},
     {include-group = "nox"},
-    'click>=8.1.8',
-    'hatch>=1.14.0',
-    'ruff>=0.9.6',
+    'click',
+    'hatch',
+    'ruff',
+
     # App specific:
     # TODO: fill in app deps here
 ]
 # Used by nox
-tests = [
+pytest = [
     # From Coppy:
-    'pytest>=8.3.4',
-    'pytest-cov>=6.0',
+    'pytest',
+    'pytest-cov',
 
     # App specific:
     # TODO: fill in app deps here
@@ -52,15 +54,15 @@ tests = [
 # Used by nox
 pre-commit = [
     # From Coppy:
-    'pre-commit>=4.1.0',
-    'pre-commit-uv>=4.1.4',
+    'pre-commit',
+    'pre-commit-uv',
 ]
 # Used by nox
 audit = [
     # From Coppy:
-    'pip-audit>=2.8.0',
+    'pip-audit',
 ]
 # Used by CI
 nox = [
-    'nox>=2025.2.9',
+    'nox',
 ]

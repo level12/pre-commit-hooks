@@ -77,7 +77,7 @@ ignore = [
 
 
 [lint.flake8-builtins]
-builtins-ignorelist = ['id', 'help', 'compile']
+ignorelist = ['id', 'help', 'compile']
 
 
 [lint.flake8-quotes]
@@ -89,4 +89,4 @@ inline-quotes = 'single'
 [lint.isort]
 lines-after-imports = 2
 force-sort-within-sections = true
-known-first-party = ['tasks_lib']
+known-local-folder = ['src', 'tests']

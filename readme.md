@@ -1,5 +1,6 @@
 # pre-commit-hooks
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/level12/pre-commit-hooks/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/level12/pre-commit-hooks/tree/main)
+[![nox](https://github.com/level12/pre-commit-hooks/actions/workflows/nox.yaml/badge.svg)](https://github.com/level12/pre-commit-hooks/actions/workflows/nox.yaml)
+
 
 ## Usage
 
@@ -26,6 +27,7 @@ repos:
       # and/or you have more than one package.  Most projects will not add these args.
       - args: [--package, foo-pkg, --package, bar-pkg]
 ```
+
 
 ## Dev
 

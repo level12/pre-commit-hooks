@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# mise description="Bump version"
+# [MISE] description="Bump version"
 """
 Originates from https://github.com/level12/coppy
 
@@ -10,7 +10,7 @@ import datetime as dt
 
 import click
 
-from tasks_lib import sub_run
+from pre_commit_hooks_tasks_lib import sub_run
 
 
 def current_version():
