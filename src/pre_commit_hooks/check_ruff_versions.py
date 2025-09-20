@@ -8,7 +8,7 @@ import pip_requirements_parser as prp
 import yaml
 
 
-pre_commit_gh_repo = 'https://github.com/charliermarsh/ruff-pre-commit'
+pre_commit_gh_repo = 'https://github.com/astral-sh/ruff-pre-commit'
 
 
 def pre_commit_version(pc_yaml: Path):
