@@ -12,7 +12,7 @@ Then, in `.pre-commit-config.yaml`:
 
 ---
 repos:
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
+  - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.9.7
     hooks:
       - id: ruff
