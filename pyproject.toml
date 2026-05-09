@@ -29,6 +29,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     {include-group = "pytest"},
+    {include-group = "prek"},
     {include-group = "audit"},
     {include-group = "nox"},
     'click',
@@ -41,8 +42,8 @@ pytest = [
     'pytest-cov',
 ]
 # Used by nox
-pre-commit = [
-    'pre-commit',
+prek = [
+    'prek',
 ]
 # Used by nox
 audit = [
