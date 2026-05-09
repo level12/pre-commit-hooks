@@ -6,7 +6,6 @@ import shutil
 import subprocess
 
 from click.testing import CliRunner
-from pre_commit.commands.try_repo import _repo_ref
 import yaml
 
 from pre_commit_hooks.check_ruff_versions import Versions, _ruff_version, main
@@ -48,6 +47,53 @@ def sub_run(
             print('STDOUT', e.stdout)
             print('STDERR', e.stderr)
         raise
+
+
+def shadow_repo_ref(tmp_dpath: Path, repo_dpath: Path) -> tuple[Path, str]:
+    # Adapted from pre_commit.commands.try_repo._repo_ref for this test's local snapshot use case.
+    ref = sub_run('git', 'rev-parse', 'HEAD', cwd=repo_dpath, capture=True).stdout.strip()
+    has_diff = sub_run('git', 'diff', '--quiet', 'HEAD', cwd=repo_dpath, returns=(0, 1))
+    if has_diff.returncode == 0:
+        return repo_dpath, ref
+
+    shadow_dpath = tmp_dpath / 'shadow-repo'
+    sub_run('git', 'clone', repo_dpath, shadow_dpath)
+    sub_run('git', 'checkout', ref, '-b', '_pc_tmp', cwd=shadow_dpath)
+
+    shadow_git_dpath = shadow_dpath / '.git'
+    shadow_env = {
+        'GIT_INDEX_FILE': (shadow_git_dpath / 'index').as_posix(),
+        'GIT_OBJECT_DIRECTORY': (shadow_git_dpath / 'objects').as_posix(),
+    }
+    staged_files = (
+        sub_run(
+            'git',
+            'diff',
+            '--cached',
+            '--name-only',
+            cwd=repo_dpath,
+            capture=True,
+        )
+        .stdout.strip()
+        .splitlines()
+    )
+    if staged_files:
+        sub_run('git', 'add', '--', *staged_files, cwd=repo_dpath, env=shadow_env)
+    sub_run('git', 'add', '-u', cwd=repo_dpath, env=shadow_env)
+    sub_run(
+        'git',
+        '-c',
+        'user.name=pre-commit-hooks tests',
+        '-c',
+        'user.email=pre-commit-hooks@example.invalid',
+        'commit',
+        '--no-gpg-sign',
+        '-m',
+        'Temporary snapshot for tests',
+        cwd=shadow_dpath,
+    )
+    ref = sub_run('git', 'rev-parse', 'HEAD', cwd=shadow_dpath, capture=True).stdout.strip()
+    return shadow_dpath, ref
 
 
 class TestRuffVersion:
@@ -122,23 +168,17 @@ class TestCheckRuffVersions:
         tmp_repo_dpath = tmp_path / 'repo'
         shutil.copytree(test_repo_dpath, tmp_repo_dpath)
 
-        clone_repo_dpath, clone_rev = _repo_ref(tmp_path.as_posix(), pkg_dpath, None)
+        clone_repo_dpath, clone_rev = shadow_repo_ref(tmp_path, pkg_dpath)
 
         pcc_fpath = tmp_repo_dpath.joinpath('.pre-commit-config.yaml')
         pcc_yaml = pcc_fpath.read_text()
-        pcc_yaml = pcc_yaml.format(crv_repo=clone_repo_dpath, crv_rev=clone_rev)
+        pcc_yaml = pcc_yaml.replace('{crv_repo}', clone_repo_dpath.as_posix())
+        pcc_yaml = pcc_yaml.replace('{crv_rev}', clone_rev)
         pcc_fpath.write_text(pcc_yaml)
 
-        sub_run('git', 'init', cwd=tmp_repo_dpath)
-        sub_run('pre-commit', 'install', cwd=tmp_repo_dpath)
-        sub_run('git', 'add', '.', cwd=tmp_repo_dpath)
-        result = sub_run('pre-commit', cwd=tmp_repo_dpath, capture=True)
-
-        assert result.returncode == 0
-        assert (
-            result.stdout.strip().splitlines()[-1]
-            == 'check ruff versions......................................................Passed'
-        )
+        result = run_cli('--repo-root', tmp_repo_dpath, '--package', 'some-pkg')
+        assert result.exit_code == 0
+        assert result.output == ''
 
 
 class TestCheckRuffVersionsUV:

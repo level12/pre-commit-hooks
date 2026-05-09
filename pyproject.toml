@@ -37,7 +37,6 @@ dev = [
 ]
 # Used by nox
 pytest = [
-    {include-group = "pre-commit"},
     'pytest',
     'pytest-cov',
 ]
