@@ -31,13 +31,15 @@ repos:
 
 ## Dev
 
+
 ### Copier Template
 
 Project structure and tooling mostly derives from the [Coppy](https://github.com/level12/coppy),
 see its documentation for context and additional instructions.
 
 This project can be updated from the upstream repo, see
-[Updating a Project](https://github.com/level12/coppy?tab=readme-ov-file#updating-a-project).
+[Updating a Project](https://github.com/level12/coppy?tab=readme-ov-file#template-updates).
+
 
 ### Project Setup
 
@@ -60,6 +62,7 @@ From zero to hero (passing tests that is):
 5. Run tests:
 
    `nox`
+
 
 ### Versions
 
