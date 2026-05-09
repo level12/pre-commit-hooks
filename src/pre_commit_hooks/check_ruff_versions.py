@@ -8,16 +8,45 @@ import pip_requirements_parser as prp
 import yaml
 
 
+prek_fname = 'prek.toml'
+pre_commit_fname = '.pre-commit-config.yaml'
+pre_commit_alt_fname = '.pre-commit-config.yml'
+pre_commit_fnames = (pre_commit_fname, pre_commit_alt_fname)
 pre_commit_gh_repo = 'https://github.com/astral-sh/ruff-pre-commit'
 
 
-def pre_commit_version(pc_yaml: Path):
-    with pc_yaml.open() as fo:
-        data = yaml.safe_load(fo)
-        for repo in data['repos']:
-            if repo['repo'] == pre_commit_gh_repo:
-                return repo.get('rev', '').replace('v', '', 1)
+def _ruff_version(repos: list[dict]) -> str | None:
+    for repo in repos:
+        if repo['repo'] == pre_commit_gh_repo:
+            return repo.get('rev', '').removeprefix('v') or None
     return None
+
+
+def pre_commit_version(pc_yaml: Path) -> str | None:
+    with pc_yaml.open() as fo:
+        data = yaml.safe_load(fo) or {}
+    return _ruff_version(data.get('repos', []))
+
+
+def prek_version(prek_toml: Path) -> str | None:
+    with prek_toml.open('rb') as fo:
+        data = tomllib.load(fo)
+    return _ruff_version(data.get('repos', []))
+
+
+def project_config_version(repo_dpath: Path) -> tuple[str | None, str]:
+    for fname in (prek_fname, *pre_commit_fnames):
+        config_fpath = repo_dpath / fname
+        if not config_fpath.exists():
+            continue
+
+        version = (
+            prek_version(config_fpath) if fname == prek_fname else pre_commit_version(config_fpath)
+        )
+        return version, fname
+
+    expected = ', '.join((prek_fname, *pre_commit_fnames))
+    raise FileNotFoundError(f'No hook config found in {repo_dpath}; expected one of: {expected}')
 
 
 def dev_version_txt(dev_txt: Path):
@@ -49,12 +78,19 @@ def dev_version_uv(uv_lock: Path):
 
 @dataclass
 class Versions:
-    pc: str
-    proj: str
+    pc: str | None
+    proj: str | None
     is_uv: bool
+    pc_fname: str
 
     @property
-    def proj_fname(self):
+    def pc_label(self) -> str:
+        if self.pc_fname == prek_fname:
+            return self.pc_fname
+        return 'pre-commit'
+
+    @property
+    def proj_fname(self) -> str:
         return 'uv.lock' if self.is_uv else 'dev.txt'
 
     @classmethod
@@ -72,15 +108,17 @@ class Versions:
             if is_uv_proj
             else dev_version_txt(package_dpath / 'requirements' / 'dev.txt')
         )
+        pc_version, pc_fname = project_config_version(repo_dpath)
         return Versions(
-            pre_commit_version(repo_dpath / '.pre-commit-config.yaml'),
+            pc_version,
             dev_version,
             is_uv_proj,
+            pc_fname,
         )
 
 
 @click.command()
-@click.argument('file_paths', nargs=-1)
+@click.argument('file_paths', nargs=-1, expose_value=False)
 # pre-commit always calls from the root of the git directory, but give tests an option.
 @click.option(
     '--repo-root',
@@ -89,7 +127,7 @@ class Versions:
 )
 @click.option('--package', 'packages', multiple=True)
 @click.pass_context
-def main(ctx: click.Context, file_paths: list[str], repo_root: Path, packages: list[str]):
+def main(ctx: click.Context, repo_root: Path, packages: list[str]):
     fail = False
 
     if not packages:
@@ -102,11 +140,11 @@ def main(ctx: click.Context, file_paths: list[str], repo_root: Path, packages: l
         package_dpath = repo_root / package if package else None
         ver = Versions.at_repo(repo_root, package_dpath)
         if ver.pc != ver.proj:
-            print('pre-commit ruff:', ver.pc)
+            print(f'{ver.pc_label} ruff:', ver.pc)
             print(f'{ver.proj_fname} ruff:', ver.proj)
             fail = True
         elif (ver.pc, ver.proj) == (None, None):
-            print(f'Both pre-commit and {ver.proj_fname} are missing ruff')
+            print(f'Both {ver.pc_label} and {ver.proj_fname} are missing ruff')
             fail = True
 
     if fail:

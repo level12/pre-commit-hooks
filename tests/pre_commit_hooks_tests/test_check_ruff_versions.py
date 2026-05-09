@@ -1,13 +1,15 @@
 from collections.abc import Iterable
 from os import environ
 from pathlib import Path
+import re
 import shutil
 import subprocess
 
 from click.testing import CliRunner
 from pre_commit.commands.try_repo import _repo_ref
+import yaml
 
-from pre_commit_hooks.check_ruff_versions import Versions, main
+from pre_commit_hooks.check_ruff_versions import Versions, _ruff_version, main
 
 
 tests_dpath = Path(__file__).parent
@@ -48,6 +50,29 @@ def sub_run(
         raise
 
 
+class TestRuffVersion:
+    def test_finds_and_normalizes(self):
+        assert _ruff_version([]) is None
+        assert _ruff_version([{'repo': 'local', 'rev': 'v9.9.9'}]) is None
+        assert _ruff_version([{'repo': 'https://github.com/astral-sh/ruff-pre-commit'}]) is None
+        assert (
+            _ruff_version([{'repo': 'https://github.com/astral-sh/ruff-pre-commit', 'rev': ''}])
+            is None
+        )
+        assert (
+            _ruff_version(
+                [{'repo': 'https://github.com/astral-sh/ruff-pre-commit', 'rev': 'v1.2.3'}],
+            )
+            == '1.2.3'
+        )
+        assert (
+            _ruff_version(
+                [{'repo': 'https://github.com/astral-sh/ruff-pre-commit', 'rev': '1.2.3'}],
+            )
+            == '1.2.3'
+        )
+
+
 class TestCheckRuffVersions:
     def test_same(self):
         start_at = tests_dpath / 'check-ruff-versions-same'
@@ -79,6 +104,17 @@ class TestCheckRuffVersions:
         result = run_cli('.pre-commit-config.yaml', '--repo-root', start_at)
         assert result.exit_code == 1
         assert result.output == 'Both pre-commit and dev.txt are missing ruff\n'
+
+    def test_yml_config(self):
+        start_at = tests_dpath / 'check-ruff-versions-yml'
+
+        ver = Versions.at_repo(start_at)
+        assert ver.pc == '0.9.7'
+        assert ver.pc_label == 'pre-commit'
+
+        result = run_cli('uv.lock', '--repo-root', start_at)
+        assert result.exit_code == 0
+        assert result.output.strip() == ''
 
     def test_pkg_in_sub_dir(self, tmp_path: Path):
         test_repo_dpath = tests_dpath / 'check-ruff-versions-pkg-in-sub-dir'
@@ -134,3 +170,62 @@ class TestCheckRuffVersionsUV:
         result = run_cli('uv.lock', '--repo-root', start_at)
         assert result.exit_code == 1
         assert result.output.strip() == ('pre-commit ruff: 0.9.7\nuv.lock ruff: None')
+
+
+class TestCheckRuffVersionsPrek:
+    def test_same(self):
+        start_at = tests_dpath / 'check-ruff-versions-prek-same'
+
+        ver = Versions.at_repo(start_at)
+        assert ver.pc == '0.9.7'
+        assert ver.pc_label == 'prek.toml'
+        assert ver.proj == '0.9.7'
+
+        result = run_cli('uv.lock', '--repo-root', start_at)
+        assert result.exit_code == 0
+        assert result.output.strip() == ''
+
+    def test_different(self):
+        start_at = tests_dpath / 'check-ruff-versions-prek-diff'
+
+        ver = Versions.at_repo(start_at)
+        assert ver.pc == '0.4.4'
+        assert ver.proj == '0.9.7'
+
+        result = run_cli('uv.lock', '--repo-root', start_at)
+        assert result.exit_code == 1
+        assert result.output.strip() == ('prek.toml ruff: 0.4.4\nuv.lock ruff: 0.9.7')
+
+    def test_prek_takes_precedence(self):
+        start_at = tests_dpath / 'check-ruff-versions-prek-precedence'
+
+        ver = Versions.at_repo(start_at)
+        assert ver.pc == '0.4.4'
+        assert ver.pc_label == 'prek.toml'
+
+        result = run_cli('uv.lock', '--repo-root', start_at)
+        assert result.exit_code == 1
+        assert result.output.strip() == ('prek.toml ruff: 0.4.4\nuv.lock ruff: 0.9.7')
+
+    def test_ruff_missing_both(self):
+        start_at = tests_dpath / 'check-ruff-versions-prek-missing'
+
+        ver = Versions.at_repo(start_at)
+        assert (ver.pc, ver.proj) == (None, None)
+        assert ver.pc_label == 'prek.toml'
+
+        result = run_cli('prek.toml', '--repo-root', start_at)
+        assert result.exit_code == 1
+        assert result.output == 'Both prek.toml and dev.txt are missing ruff\n'
+
+
+class TestHookManifest:
+    def test_matches_prek_toml(self):
+        hook = yaml.safe_load(pkg_dpath.joinpath('.pre-commit-hooks.yaml').read_text())[0]
+
+        assert re.search(hook['files'], 'prek.toml')
+        assert re.search(hook['files'], '.pre-commit-config.yaml')
+        assert re.search(hook['files'], '.pre-commit-config.yml')
+        assert re.search(hook['files'], 'path/to/uv.lock')
+        assert re.search(hook['files'], 'path/to/requirements/dev.txt')
+        assert not re.search(hook['files'], 'subdir/prek.toml')

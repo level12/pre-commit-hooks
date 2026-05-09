@@ -1,0 +1,5 @@
+version = 1
+
+[[package]]
+name = "ruff"
+version = "0.9.7"
