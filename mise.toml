@@ -5,6 +5,7 @@ _.python.venv.path = '{{ env.UV_PROJECT_ENVIRONMENT }}'
 
 
 [tools]
+dprint = "latest"
 python = "{{ exec(command='tasks/mise-uv-init.py py-ver', cache_key='py-ver', cache_duration='1h') | trim }}"
 
 
