@@ -34,7 +34,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/level12/pre-commit-hooks"
-rev = "v0.20260422.1"
+rev = "v0.20260509.3"
 hooks = [
   { id = "check-ruff-versions" }
 ]
