@@ -2,11 +2,15 @@
 [build]
 dev-mode-dirs = ['src']
 
-
 ## Env: default
 [envs.default]
 installer = "uv"
 
+## Metadata
+[metadata]
+# Only required until tomlkit makes a release with 1.1 support:
+# https://github.com/python-poetry/tomlkit/issues/465
+allow-direct-references = true
 
 ## Version
 [version]

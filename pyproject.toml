@@ -18,6 +18,9 @@ dependencies = [
     "click>=8.1.8",
     "pip-requirements-parser>=32.0.1",
     "pyyaml>=6.0.2",
+    # Only required until tomlkit makes a release with 1.1 support:
+    # https://github.com/python-poetry/tomlkit/issues/465
+    "tomlkit @ https://github.com/python-poetry/tomlkit/archive/7f237d8f5d07d23422571e9daaf411f4a2356855.tar.gz",
 ]
 
 

@@ -225,6 +225,18 @@ class TestCheckRuffVersionsPrek:
         assert result.exit_code == 0
         assert result.output.strip() == ''
 
+    def test_toml_1_1(self):
+        start_at = tests_dpath / 'check-ruff-versions-prek-toml-1-1'
+
+        ver = Versions.at_repo(start_at)
+        assert ver.pc == '0.9.7'
+        assert ver.pc_label == 'prek.toml'
+        assert ver.proj == '0.9.7'
+
+        result = run_cli('uv.lock', '--repo-root', start_at)
+        assert result.exit_code == 0
+        assert result.output.strip() == ''
+
     def test_different(self):
         start_at = tests_dpath / 'check-ruff-versions-prek-diff'
 

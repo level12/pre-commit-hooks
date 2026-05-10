@@ -5,6 +5,7 @@ import tomllib
 
 import click
 import pip_requirements_parser as prp
+import tomlkit
 import yaml
 
 
@@ -28,9 +29,13 @@ def pre_commit_version(pc_yaml: Path) -> str | None:
     return _ruff_version(data.get('repos', []))
 
 
+def load_prek_toml(prek_fpath: Path) -> dict:
+    with prek_fpath.open('rb') as fo:
+        return tomlkit.load(fo).unwrap()
+
+
 def prek_version(prek_toml: Path) -> str | None:
-    with prek_toml.open('rb') as fo:
-        data = tomllib.load(fo)
+    data = load_prek_toml(prek_toml)
     return _ruff_version(data.get('repos', []))
 
 

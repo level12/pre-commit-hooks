@@ -844,6 +844,7 @@ dependencies = [
     { name = "click" },
     { name = "pip-requirements-parser" },
     { name = "pyyaml" },
+    { name = "tomlkit" },
 ]
 
 [package.dev-dependencies]
@@ -876,6 +877,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.1.8" },
     { name = "pip-requirements-parser", specifier = ">=32.0.1" },
     { name = "pyyaml", specifier = ">=6.0.2" },
+    { name = "tomlkit", url = "https://github.com/python-poetry/tomlkit/archive/7f237d8f5d07d23422571e9daaf411f4a2356855.tar.gz" },
 ]
 
 [package.metadata.requires-dev]
@@ -1217,11 +1219,8 @@ wheels = [
 [[package]]
 name = "tomlkit"
 version = "0.14.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/c3/af/14b24e41977adb296d6bd1fb59402cf7d60ce364f90c890bd2ec65c43b5a/tomlkit-0.14.0.tar.gz", hash = "sha256:cf00efca415dbd57575befb1f6634c4f42d2d87dbba376128adb42c121b87064", size = 187167, upload-time = "2026-01-13T01:14:53.304Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b5/11/87d6d29fb5d237229d67973a6c9e06e048f01cf4994dee194ab0ea841814/tomlkit-0.14.0-py3-none-any.whl", hash = "sha256:592064ed85b40fa213469f81ac584f67a4f2992509a7c3ea2d632208623a3680", size = 39310, upload-time = "2026-01-13T01:14:51.965Z" },
-]
+source = { url = "https://github.com/python-poetry/tomlkit/archive/7f237d8f5d07d23422571e9daaf411f4a2356855.tar.gz" }
+sdist = { hash = "sha256:c2cb985e5fa0a964dba458fb770a4845a239797b1cc3164c3bfc8c2968710163" }
 
 [[package]]
 name = "trove-classifiers"
